@@ -47,7 +47,7 @@ class NL2KubectlCustomTool(BaseTool):
     args_schema: Type[BaseModel] = NL2KubectlCustomToolInput
 
     def _run(self, nl_query: str) -> str:
-        harmful_commands = ["rm "]
+        harmful_commands = ["rm ", "kubectl edit ", "kubectl proxy ", "kubectl port-forward ", "kubectl exec -it ", "kubectl attach -i ", "kubectl run -i ", "kubectl port-forward ", "kubectl cp "]
         if self.is_remediation:
             while True:
                 try:
@@ -60,13 +60,16 @@ class NL2KubectlCustomTool(BaseTool):
                         user_input = input("Execute command? (Y/N)").strip().lower()
                     
                     if user_input == "y":
-                        return self._execute_kubectl_command(command)[0:8000]
+                        for harmful_command in harmful_commands:
+                            if command.startswith(harmful_command):
+                                return f"Potentially harmful command found. Execution is not allowed. The harmful command was: {command}"
+                        return self._execute_kubectl_command(command)[0][0:8000]
                     else:
                         problem_description = input("What is wrong with the command?")
-                        nl_query = (
-                            f"User says there is a problem with the command that you wrote:\n"
-                            f"{command}\nHere is their description of the problem: {problem_description}"
+                        retry = (
+                            f"User says there is a problem with the command that you wrote:\nhere is the problem description: {problem_description}\nHere is the command that you wrote: {command}\nPlease write a new command that fixes the problem."
                         )
+                        return retry
                 except Exception as exc:
                     logger.error(f"NL2Kubectl Tool failed with: {exc}")
                     return f"NL2Kubectl Tool failed with: {exc}"
@@ -75,8 +78,8 @@ class NL2KubectlCustomTool(BaseTool):
                     command = self._generate_kubectl_command(prompt=nl_query)
                     for harmful_command in harmful_commands:
                         if command.startswith(harmful_command):
-                            return "Potentially harmful command found. Execution is not allowed."
-                    return self._execute_kubectl_command(command)[0:8000]
+                            return f"Potentially harmful command found. Execution is not allowed. The harmful command was: {command}"
+                    return self._execute_kubectl_command(command)[0][0:8000]
             except Exception as exc:
                     logger.error(f"NL2Kubectl Tool failed with: {exc}")
                     return f"NL2Kubectl Tool failed with: {exc}"
@@ -103,11 +106,11 @@ class NL2KubectlCustomTool(BaseTool):
         if result.returncode == 0:
             logger.info(f"NL2Kubectl Tool command execution: {result.stdout}")
             print(f"NL2Kubectl Tool command execution: {result.stdout}")
-            return result.stdout
+            return result.stdout, result.returncode
         else:
             print(f"Error executing kubectl command: {result.stderr}")
             logger.error(f"Error executing kubectl command: {result.stderr}")
-            return f"Error executing kubectl command: {result.stderr}"
+            return f"Error executing kubectl command: {result.stderr}", result.returncode
         
     def _summarize_kubernetes(self, kubernetes):
         system_prompt = "You do kubectl output analysis and summarization. Look at the kubectl output given to you and provide a brief summary and analysis of them."

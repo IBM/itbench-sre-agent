@@ -182,8 +182,7 @@ class NL2LogsCustomTool(GrafanaBaseClient, BaseTool):
                 "query": f"app='{application}'",
             }
             response = self._make_request("GET", url, params=params)
-            logger.info(
-                f"NL2Logs Tool query Loki logs: {response.status_code}")
+            logger.info(f"NL2Logs Tool query Loki logs: {response.status_code}")
             print(f"NL2Logs Tool query Loki logs: {response.content}")
             return response.json()
         except Exception as e:

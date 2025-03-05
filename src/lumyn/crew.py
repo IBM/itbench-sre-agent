@@ -15,12 +15,12 @@
 
 import os
 
-from chromadb.utils.embedding_functions import OpenAIEmbeddingFunction
+# from chromadb.utils.embedding_functions import OpenAIEmbeddingFunction
 from crewai import LLM, Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
 from dotenv import load_dotenv
 
-from lumyn.llm_backends.get_default_backend import (get_llm_backend_for_agents,
+from lumyn.llm_backends.init_backend import (get_llm_backend_for_agents,
                                                     get_llm_backend_for_tools)
 from lumyn.tools.code_generation.nl2script import NL2ScriptCustomTool
 from lumyn.tools.grafana.get_alerts import GetAlertsCustomTool

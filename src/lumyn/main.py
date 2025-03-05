@@ -22,10 +22,20 @@ import time
 
 from lumyn.crew import LumynCrew
 from lumyn.tools.grafana.get_alerts import GetAlertsCustomTool
+from lumyn.tools.kubectl.nl2kubectl import NL2KubectlCustomTool
 from lumyn.tools.grafana.get_topology_nodes import GetTopologyNodes
+from lumyn.llm_backends.init_backend import (get_llm_backend_for_agents,
+                                                    get_llm_backend_for_tools)
 
-# Logs directory, optional
-logs_dir_path = "/runner"
+from agent_analytics.instrumentation import agent_analytics_sdk
+
+if "STRUCTURED_UNSTRUCTURED_OUTPUT_DIRECTORY_PATH" in os.environ:
+    logs_dir_path = os.getenv("STRUCTURED_UNSTRUCTURED_OUTPUT_DIRECTORY_PATH")
+    log_filename = "agent_analytics_sdk_logs"
+
+    # Initialize logging with agent_analytics_sdk
+    agent_analytics_sdk.initialize_logging(logs_dir_path=logs_dir_path,
+                                           log_filename=log_filename)
 
 # This main file is intended to be a way for your to run your
 # crew locally, so refrain from adding necessary logic into this file.
@@ -99,6 +109,10 @@ def run():
     """
     Run the crew.
     """
+    kubectl = NL2KubectlCustomTool(llm_backend=get_llm_backend_for_tools())._execute_kubectl_command("kubectl get ns")
+    if kubectl[1] != 0:
+        raise Exception("KUBECONFIG is not configured correctly.")
+
     while True:
         alerts = GetAlertsCustomTool()._run()
         if alerts is not None and len(alerts) > 0:

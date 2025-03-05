@@ -7,18 +7,18 @@ authors = [
 ]
 requires-python = ">=3.10,<=3.13"
 dependencies = [
-    "langchain-ibm>=0.3.0",
-    "langchain-core>=0.3.0,<0.4",
     "python-dotenv>=1.0",
     "networkx>=3.3",
     "panel>=1.5.2",
     "streamlit>=1.39.0",
     "promformat>=1.0.2",
-    "litellm==1.57.0",
+    "litellm==1.60.2",
     "antlr4-python3-runtime==4.10",
     "numpy==1.26.4",
-    "crewai-tools>=0.25.8",
-    "crewai==0.95.0",
+    "crewai-tools==0.36.0",
+    "crewai==0.102.0",
+    "agent-analytics",
+    "langgraph>=0.3.3",
 ]
 
 [project.scripts]
@@ -33,3 +33,6 @@ requires = [
     "hatchling",
 ]
 build-backend = "hatchling.build"
+
+[tool.uv.sources]
+agent-analytics = { path = "../agent-analytics-sdk" }

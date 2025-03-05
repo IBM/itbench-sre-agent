@@ -17,7 +17,7 @@ import logging
 
 from dotenv import load_dotenv
 
-from lumyn.llm_backends.get_default_backend import get_llm_backend_for_tools
+from lumyn.llm_backends.init_backend import get_llm_backend_for_tools
 from lumyn.tools.llm_analyzer import LLMAnalyzerCustomTool
 
 # Load environment variables from the .env file

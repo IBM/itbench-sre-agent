@@ -17,7 +17,7 @@ import logging
 
 from dotenv import load_dotenv
 
-from lumyn.llm_backends.get_default_backend import get_llm_backend_for_tools
+from lumyn.llm_backends.init_backend import get_llm_backend_for_tools
 from lumyn.tools.graph_traversal.nl2_get_node_info import NL2GraphGetNodeInfoCustomTool
 
 # Load environment variables from the .env file
