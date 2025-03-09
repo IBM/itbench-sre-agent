@@ -22,7 +22,7 @@ from dotenv import load_dotenv
 
 from lumyn.llm_backends.get_default_backend import (get_llm_backend_for_agents,
                                                     get_llm_backend_for_tools)
-from lumyn.tools.code_generation.nl2script import NL2ScriptCustomTool
+# from lumyn.tools.code_generation.nl2script import NL2ScriptCustomTool
 from lumyn.tools.grafana.get_alerts import GetAlertsCustomTool
 from lumyn.tools.grafana.nl2logs import NL2LogsCustomTool
 from lumyn.tools.grafana.nl2metrics import NL2MetricsCustomTool
