@@ -5,19 +5,19 @@ Clone and follow the instructions in [this repo](https://github.com/IBM/it-bench
 The agent should always be run in a container in order to prevent harmful commands being run on the user's PC.  
 
 1. Clone the repo
-```
+```bash
 git clone git@github.com:IBM/itbench-sre-agent.git
 cd itbench-sre-agent
 ```
 
 2. Create a `.env` based on `.env.tmpl` by running:
-```
+```bash
 cp .env.tmpl .env
 ```
 Update the values here to switch LLM backends. Supports all providers and models that are available through [LiteLLM](https://docs.litellm.ai/docs/providers). Also update the values at the bottom so the agent can interact with your cluster.
 
 3. Build the image.
-```
+```bash
 # Docker
 docker build -t itbench-sre-agent .
 # Podman
@@ -25,7 +25,7 @@ podman build -t itbench-sre-agent .
 ```
 
 4. Run the image in interactive mode:
-```
+```bash
 # Docker
 docker run -it itbench-sre-agent /bin/bash
 # Podman
@@ -36,7 +36,7 @@ If you are running the agent on the same machine as the bench then you need to r
 and then run the agent image with --network=host (docker run --network=host -it itbench-sre-agent /bin/bash) and then for the grafana url use http://localhost:8080/prometheus.
 ```
 5. Start the agent:
-```
+```bash
 sudo crewai run
 ```
 
@@ -44,7 +44,7 @@ Pre-built images coming soon.
 
 # Development Setup Instructions
 1. Clone the repo
-```
+```bash
 git clone git@github.com:IBM/itbench-sre-agent.git
 cd itbench-sre-agent
 ```
@@ -63,12 +63,12 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
 uv tool install crewai
 ```
 3. Navigate to the root project directory and install the dependencies using the CLI command:
-```
+```bash
 crewai install
 ```
   
 4. Create a `.env` based on `.env.tmpl` by running:
-```
+```bash
 cp .env.tmpl .env
 ```
 Update the values here to switch LLM backends.
