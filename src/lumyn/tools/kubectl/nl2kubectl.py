@@ -1,18 +1,3 @@
-# Copyright contributors to the ITBench project. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-
 import logging
 import os
 import re
@@ -38,16 +23,14 @@ class NL2KubectlCustomToolInput(BaseModel):
 
 class NL2KubectlCustomTool(BaseTool):
     name: str = "NL2Kubectl Tool"
-    description: str = (
-        "Converts natural language to kubectl commands and executes them. Can be used to get/describe/edit Kubernetes deployments, services, and other Kubernetes components. Only takes one query at a time. Keep queries simple and straight-forward. This tool cannot handle complex mutli-step queries. Remember that most kubectl queries require a namespace name."
-    )
+    description: str = "Converts natural language to kubectl commands and executes them. Can be used to get/describe/edit Kubernetes deployments, services, and other Kubernetes components. Only takes one query at a time. Keep queries simple and straight-forward. This tool cannot handle complex mutli-step queries. Remember that most kubectl queries require a namespace name. When using NL2Kubectl Tool you could ask queries like: get the yaml file for the deployment called back in the default namespace get the logs from the pod 123xyz in the complexdd namespace get all the services in the abc789 namespace describe the pod lol123 in the abc789 namespace"
     llm_backend: Any
     is_remediation: bool = False
     god_mode: bool = False
     args_schema: Type[BaseModel] = NL2KubectlCustomToolInput
 
     def _run(self, nl_query: str) -> str:
-        harmful_commands = ["rm "]
+        harmful_commands = ["rm ", "kubectl edit ", "kubectl proxy ", "kubectl port-forward ", "kubectl exec -it ", "kubectl attach -i ", "kubectl run -i ", "kubectl port-forward ", "kubectl cp "]
         if self.is_remediation:
             while True:
                 try:
@@ -60,13 +43,16 @@ class NL2KubectlCustomTool(BaseTool):
                         user_input = input("Execute command? (Y/N)").strip().lower()
                     
                     if user_input == "y":
-                        return self._execute_kubectl_command(command)[0:8000]
+                        for harmful_command in harmful_commands:
+                            if command.startswith(harmful_command):
+                                return f"Potentially harmful command found. Execution is not allowed. The harmful command was: {command}"
+                        return self._execute_kubectl_command(command)[0][0:8000]
                     else:
                         problem_description = input("What is wrong with the command?")
-                        nl_query = (
-                            f"User says there is a problem with the command that you wrote:\n"
-                            f"{command}\nHere is their description of the problem: {problem_description}"
+                        retry = (
+                            f"User says there is a problem with the command that you wrote:\nhere is the problem description: {problem_description}\nHere is the command that you wrote: {command}\nPlease write a new command that fixes the problem."
                         )
+                        return retry
                 except Exception as exc:
                     logger.error(f"NL2Kubectl Tool failed with: {exc}")
                     return f"NL2Kubectl Tool failed with: {exc}"
@@ -75,8 +61,8 @@ class NL2KubectlCustomTool(BaseTool):
                     command = self._generate_kubectl_command(prompt=nl_query)
                     for harmful_command in harmful_commands:
                         if command.startswith(harmful_command):
-                            return "Potentially harmful command found. Execution is not allowed."
-                    return self._execute_kubectl_command(command)[0:8000]
+                            return f"Potentially harmful command found. Execution is not allowed. The harmful command was: {command}"
+                    return self._execute_kubectl_command(command)[0][0:8000]
             except Exception as exc:
                     logger.error(f"NL2Kubectl Tool failed with: {exc}")
                     return f"NL2Kubectl Tool failed with: {exc}"
@@ -103,11 +89,11 @@ class NL2KubectlCustomTool(BaseTool):
         if result.returncode == 0:
             logger.info(f"NL2Kubectl Tool command execution: {result.stdout}")
             print(f"NL2Kubectl Tool command execution: {result.stdout}")
-            return result.stdout
+            return result.stdout, result.returncode
         else:
             print(f"Error executing kubectl command: {result.stderr}")
             logger.error(f"Error executing kubectl command: {result.stderr}")
-            return f"Error executing kubectl command: {result.stderr}"
+            return f"Error executing kubectl command: {result.stderr}", result.returncode
         
     def _summarize_kubernetes(self, kubernetes):
         system_prompt = "You do kubectl output analysis and summarization. Look at the kubectl output given to you and provide a brief summary and analysis of them."

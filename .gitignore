@@ -143,3 +143,6 @@ outputs/
 
 # Apple Users
 .DS_Store
+
+.env_old
+.env_new

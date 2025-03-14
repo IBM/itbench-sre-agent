@@ -1,0 +1,5 @@
+Here are examples of queries you could ask the NL2Kubectl Tool:
+get the yaml file for the deployment called back in the default namespace
+get the logs from the pod 123xyz in the complexdd namespace
+get all the services in the abc789 namespace
+describe the pod lol123 in the abc789 namespace

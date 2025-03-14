@@ -7,10 +7,29 @@ sre_agent_name__version_number: "lumyn-0.0.1"
 
 sre_agent_max_runtime_in_seconds: 900 # in seconds
 
-llm_model_name: "gpt-4o-2024-08-06"
-llm_base_url: "https://api.openai.com/v1"
-llm_api_key: ""
-llm_temperature: 0.0
+provider_agent: "azure"
+model_agent: ""
+base_url_agent: ""
+api_key_agent: "" # pragma: allowlist secret
+api_version_agent: ""
+seed_agent: ""
+top_p_agent: ""
+temperature_agent: ""
+reasoning_effort_agent: ""
+provider_tools: ""
+model_tools: ""
+base_url_tools: ""
+api_key_tools: "" # pragma: allowlist secret
+api_version_tools: ""
+seed_tools: ""
+top_p_tools: ""
+temperature_tools: ""
+reasoning_effort_tools: ""
+is_native_function_calling_supported: ""
+wx_project_id: ""
+enable_god_mode: ""
+agent_analytics_sdk_username: ""
+agent_analytics_sdk_token: ""
 
 grafana_url: ""
 grafana_service_account_token: "NO_LONGER_NEEDED_TO_BE_SET"

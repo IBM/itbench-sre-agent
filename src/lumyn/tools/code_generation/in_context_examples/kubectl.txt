@@ -1,0 +1,14 @@
+Input: Fetch information about the front-service service in the simple-us namespace
+Output: kubectl describe service front-service -n simple-us
+
+Input: Retrieve all pods in the simple-us namespace that have the label app=back
+Output: kubectl get pods -n simple-us -l app=back
+
+Input: Get information about the back-service deployment in the simple-us namespace.
+Output: kubectl get deployment back-service -n simple-us
+
+Input: Provide detailed information about the front-service RoleBinding in the simple-us namespace.
+Output: kubectl describe rolebinding front-service -n simple-us
+
+Input: Get detailed information about the back-service deployment in the simple-us namespace.
+Output: kubectl describe deployment back-service -n simple-us

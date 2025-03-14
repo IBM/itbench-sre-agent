@@ -1,18 +1,3 @@
-# Copyright contributors to the ITBench project. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-
 import json
 import logging
 import os
@@ -40,15 +25,14 @@ class NL2LogsCustomToolInput(BaseModel):
     )
 
 
-class NL2LogsCustomTool(GrafanaBaseClient, BaseTool):
+class NL2LogsCustomTool(BaseTool, GrafanaBaseClient):
     name: str = "NL2Logs Tool"
-    description: str = (
-        "Converts natural language to LogQL queries and executes them to access logs (and other information) from Loki via the Grafana API."
-    )
+    description: str = "Converts natural language to LogQL queries and executes them to access logs (and other information) from Loki via the Grafana API. When using the NL2Logs Tool you could ask queries like: get the logs from the payment deployment get the logs from the worker-node-1 kubernetes host get the logs from the payment service with label app=payment NL2Logs only works for logs from services using their app name."
     llm_backend: Any = None
     args_schema: Type[BaseModel] = NL2LogsCustomToolInput
 
     def _run(self, nl_query: str) -> str:
+        GrafanaBaseClient.model_post_init(self)
         try:
             function_name, function_arguments = self._generate_logql_query(
                 prompt=nl_query)
@@ -182,8 +166,7 @@ class NL2LogsCustomTool(GrafanaBaseClient, BaseTool):
                 "query": f"app='{application}'",
             }
             response = self._make_request("GET", url, params=params)
-            logger.info(
-                f"NL2Logs Tool query Loki logs: {response.status_code}")
+            logger.info(f"NL2Logs Tool query Loki logs: {response.status_code}")
             print(f"NL2Logs Tool query Loki logs: {response.content}")
             return response.json()
         except Exception as e:

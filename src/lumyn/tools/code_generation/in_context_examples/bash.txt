@@ -1,0 +1,15 @@
+EXAMPLE INPUTS AND OUTPUTS
+
+INPUT: Get the yaml file for the deployment called back in the default namespace.
+OUTPUT: ```bash\nkubectl get deployment back -o yaml\n```
+
+INPUT: Get the logs from the pod 123xyz in the complexdd namespace.
+OUTPUT: ```bash\nkubectl logs 123xyz -n complexdd\n```
+
+INPUT: get all the services in the abc789 namespace
+OUTPUT: ```bash\nkubectl get services -n abc789\n```
+
+INPUT: describe the pod lol123 in the abc789 namespace
+OUTPUT: ```bash\nkubectl describe pod lol123 -n abc789\n```
+
+END OF EXAMPLES

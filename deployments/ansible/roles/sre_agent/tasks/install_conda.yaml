@@ -9,7 +9,7 @@
     - sre_agent
 
 - name: Set up UV
-  ansible.builtin.shell: "source {{ conda_sh_directory }} && conda activate {{ conda_env_directory }} && pip install --no-input uv==0.5.21"
+  ansible.builtin.shell: "source {{ conda_sh_directory }} && conda activate {{ conda_env_directory }} && pip install --no-input uv"
   register: shell_output_setup_uv
   retries: 3
   delay: 10

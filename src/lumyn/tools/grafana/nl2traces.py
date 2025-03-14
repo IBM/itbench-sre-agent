@@ -1,18 +1,3 @@
-# Copyright contributors to the ITBench project. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-
 import json
 import logging
 import os
@@ -41,17 +26,16 @@ class NL2TracesCustomToolInput(BaseModel):
     )
 
 
-class NL2TracesCustomTool(GrafanaBaseClient, BaseTool):
+class NL2TracesCustomTool(BaseTool, GrafanaBaseClient):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     name: str = "NL2Traces Tool"
-    description: str = (
-        "Take in a natural language query or utterance and turn it into function arguments. This tool is for gathering traces from jaeger."
-    )
+    description: str = "Take in a natural language query or utterance and turn it into function arguments. This tool is for gathering traces from jaeger. When using NL2Traces Tool you could ask queries like: retrieve traces for payment-service for the last hour get traces for test-service for the last 15 minutes get GET traces for back-service for the last 15 minutes get POST traces from ticket-service for the last 5 minutes get POST traces from <service-name> for the last X minutes"
     llm_backend: Any = None
     args_schema: Type[BaseModel] = NL2TracesCustomToolInput
 
     def _run(self, nl_query: str) -> str:
+        GrafanaBaseClient.model_post_init(self)
         try:
             function_name, function_arguments, current_time = self._generate_jaeger_query(
                 prompt=nl_query)

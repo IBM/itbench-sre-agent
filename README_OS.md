@@ -49,19 +49,17 @@ git clone git@github.com:IBM/itbench-sre-agent.git
 cd itbench-sre-agent
 ```
 
-2. Ensure you have Python 3.12 installed. This project uses [uv](https://docs.astral.sh/uv/) for dependency management.
+2. Ensure you have Python 3.12 installed. This project uses [uv](https://docs.astral.sh/uv/) for dependency management.  
+Mac/Linux
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+uv tool install crewai
 ```
-python -m venv crew_env
-
-# Mac/Linux
-source crew_env/bin/activate
-
-# Windows
-crew_env\Scripts\activate
-
-pip install uv
-pip install crewai
-pip install crewai-tools
+  
+Windows  
+```bash
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+uv tool install crewai
 ```
 3. Navigate to the root project directory and install the dependencies using the CLI command:
 ```

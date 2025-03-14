@@ -43,7 +43,7 @@ class DiagnosisJSONReportCustomTool(BaseTool):
             directory = os.getenv("STRUCTURED_UNSTRUCTURED_OUTPUT_DIRECTORY_PATH")
         else:
             proj_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.getcwd())))
-            directory = os.path.join(proj_dir, os.environ.get('SRE_AGENT_EVALUATION_DIRECTORY'), os.environ.get('SRE_AGENT_NAME_VERSION_NUMBER'), os.environ.get('LLM_MODEL_NAME').replace('/','_'), os.environ.get('INCIDENT_NUMBER') , os.environ.get('EXP_NAME'))
+            directory = os.path.join(proj_dir, os.environ.get('SRE_AGENT_EVALUATION_DIRECTORY'), os.environ.get('SRE_AGENT_NAME_VERSION_NUMBER'), os.environ.get('MODEL_AGENTS').replace('/','_'), os.environ.get('INCIDENT_NUMBER') , os.environ.get('EXP_NAME'))
         with open(os.path.join(directory,'diag_end_time.txt'),'w') as f:
             f.write(datetime.datetime.now().isoformat())
 

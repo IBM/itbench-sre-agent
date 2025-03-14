@@ -14,11 +14,11 @@ dependencies = [
     "panel>=1.5.2",
     "streamlit>=1.39.0",
     "promformat>=1.0.2",
-    "litellm==1.57.0",
     "antlr4-python3-runtime==4.10",
     "numpy==1.26.4",
-    "crewai-tools>=0.25.8",
-    "crewai==0.95.0",
+    "crewai-tools==0.37.0",
+    "crewai==0.105.0",
+    "litellm==1.60.2",
 ]
 
 [project.scripts]

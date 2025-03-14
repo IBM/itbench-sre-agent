@@ -1,31 +1,14 @@
-# Copyright contributors to the ITBench project. All rights reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-
 #!/usr/bin/env python
 import datetime
 import json
 import os
 import sys
-import time
 
 from lumyn.crew import LumynCrew
 from lumyn.tools.grafana.get_alerts import GetAlertsCustomTool
+from lumyn.tools.kubectl.nl2kubectl import NL2KubectlCustomTool
 from lumyn.tools.grafana.get_topology_nodes import GetTopologyNodes
-
-# Logs directory, optional
-logs_dir_path = "/runner"
+from lumyn.llm_backends.init_backend import (get_llm_backend_for_tools)
 
 # This main file is intended to be a way for your to run your
 # crew locally, so refrain from adding necessary logic into this file.
@@ -45,7 +28,7 @@ def format_final_op():
         agent_op_dir = os.path.join(
             proj_dir, os.environ.get('SRE_AGENT_EVALUATION_DIRECTORY'),
             os.environ.get('SRE_AGENT_NAME_VERSION_NUMBER'),
-            os.environ.get('LLM_MODEL_NAME').replace('/', '_'),
+            os.environ.get('MODEL_AGENTS').replace('/', '_'),
             incident_number, os.environ.get('EXP_NAME'))
 
     op_json = {"id": f"inc-{incident_number}"}
@@ -99,6 +82,10 @@ def run():
     """
     Run the crew.
     """
+    kubectl = NL2KubectlCustomTool(llm_backend=get_llm_backend_for_tools())._execute_kubectl_command("kubectl cluster-info")
+    if kubectl[1] != 0:
+        raise Exception("KUBECONFIG is not configured correctly.")
+
     while True:
         alerts = GetAlertsCustomTool()._run()
         if alerts is not None and len(alerts) > 0:
@@ -122,7 +109,7 @@ def run():
             break
 
     inputs = {
-        "topic": "Problem diagnosis and remediation for an IT environment."
+        "alerts": alerts
     }
 
     if "STRUCTURED_UNSTRUCTURED_OUTPUT_DIRECTORY_PATH" in os.environ:
@@ -133,7 +120,7 @@ def run():
         eval_dir = os.path.join(
             proj_dir, os.environ.get('SRE_AGENT_EVALUATION_DIRECTORY'),
             os.environ.get('SRE_AGENT_NAME_VERSION_NUMBER'),
-            os.environ.get('LLM_MODEL_NAME').replace('/', '_'),
+            os.environ.get('MODEL_AGENTS').replace('/', '_'),
             os.environ.get('INCIDENT_NUMBER'), os.environ.get('EXP_NAME'))
     with open(os.path.join(eval_dir, 'alert_start_time.txt'), 'w') as f:
         f.write(datetime.datetime.now().isoformat())

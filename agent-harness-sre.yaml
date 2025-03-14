@@ -1,0 +1,32 @@
+path_to_data_provided_by_scenario: /tmp/agent/scenario_data.json # Path to the location that a bundle data is downloaded from Benchmark Server. The bundle data means the data that Bundle Runner stores after the bundle finished setting up an scenario environment. The data contents are equivalent with "get" of Make target (See also Bundle Section). Usually, it's credentials to the environment like "kubeconfig". During the runtime, the bundle data is accessible in /tmp/agent/scenario_data.json.
+path_to_data_pushed_to_scenario: /tmp/agent/agent_output.data # Path to the location to be pushed to Benchmark Server. Please use this as persisting the Agent output. The pushed data is accessible via API ("GET /benchmarks/{benchmark_id}/file/{bundle_id}.data")
+run:
+  command: ["/bin/bash"]
+  args:
+  - -c
+  - |
+    pid=$$
+    timestamp=$(date +%Y%m%d%H%M%S)
+    tmpdir=/tmp/agent/${timestamp}_${pid}
+    workspace=${tmpdir}/workspace
+    mkdir -p ${tmpdir}
+    mkdir -p ${workspace}
+
+    cat /tmp/agent/scenario_data.json > ${tmpdir}/scenario_data.json
+
+    # build agent input
+    jq -r .kubeconfig ${tmpdir}/scenario_data.json > ${tmpdir}/kubeconfig.yaml
+    grafana_url=$(jq -r .grafana_url ${tmpdir}/scenario_data.json)
+    export KUBECONFIG=${tmpdir}/kubeconfig.yaml
+    export GRAFANA_URL=${grafana_url}
+    export TOPOLOGY_URL=${grafana_url}
+    # run agent
+    crewai run > /tmp/agent_run.out 2>&1
+    # finish agent
+    
+    # Copy the output file to <path_to_data_pushed_to_scenario>
+    if [ -f /app/lumyn/outputs/agent_evaluation/agent_output.json ]; then
+      cp /app/lumyn/outputs/agent_evaluation/agent_output.json /tmp/agent/agent_output.data
+    else
+      echo "Agent output file does not exist, skipping copy"
+    fi

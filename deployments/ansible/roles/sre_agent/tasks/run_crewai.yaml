@@ -32,7 +32,7 @@
     - sre_agent
 
 - name: (Hack) Kubeconfig path inside AWX-EE container
-  ansible.builtin.shell: find /runner/env -type f -size +3072c
+  ansible.builtin.shell: "find /runner/env -type f -size +3072c -exec grep -l 'kind: Config' {} \\;"
   register: kubeconfig_path_inside_ee
   tags:
     - sre_agent
@@ -40,23 +40,39 @@
 - name: CrewAI Prerequisite -- set .env prior to CrewAI run
   debug:
     msg: |-
-      LLM_MODEL_NAME="{{ llm_model_name }}"
-      LLM_API_KEY="{{ llm_api_key }}" # pragma: allowlist secret
-      LLM_BASE_URL="{{ llm_base_url }}"
-      IS_AZURE="{{ is_azure if is_azure is defined else 'False' }}"
-      IS_WATSONX="{{ is_watsonx if is_watsonx is defined else 'False' }}"
+      PROVIDER_AGENTS="{{ provider_agents }}"
+      MODEL_AGENTS="{{ model_agents }}"
+      BASE_URL_AGENTS="{{ base_url_agents }}"
+      API_VERSION_AGENTS="{{ api_version_agents }}"
+      API_KEY_AGENTS="{{ api_key_agents }}" # pragma: allowlist secret
+      SEED_AGENTS="{{ seed_agents }}"
+      TOP_P_AGENTS="{{ top_p_agents }}"
+      TEMPERATURE_AGENTS="{{ temperature_agents }}"
+      REASONING_EFFORT_AGENTS="{{ reasoning_effort_agents }}"
+      THINKING_AGENTS="{{ thinking_agents }}"
+      THINKING_BUDGET_AGENTS="{{ thinking_budget_agents }}"
+      MAX_TOKENS_AGENTS="{{ max_tokens_agents }}"
+      PROVIDER_TOOLS="{{ provider_tools }}"
+      MODEL_TOOLS="{{ model_tools }}"
+      BASE_URL_TOOLS="{{ base_url_tools }}"
+      API_VERSION_TOOLS="{{ api_version_tools }}"
+      API_KEY_TOOLS="{{ api_key_tools }}" # pragma: allowlist secret
+      SEED_TOOLS="{{ seed_tools }}"
+      TOP_P_TOOLS="{{ top_p_tools }}"
+      TEMPERATURE_TOOLS="{{ temperature_tools }}"
+      REASONING_EFFORT_TOOLS="{{ reasoning_effort_tools }}"
+      THINKING_TOOLS="{{ thinking_tools }}"
+      THINKING_BUDGET_TOOLS="{{ thinking_budget_tools }}"
+      MAX_TOKENS_TOOLS="{{ max_tokens_tools }}"
+      IS_NATIVE_FUNCTION_CALLING_SUPPORTED="{{ is_native_function_calling_supported if is_native_function_calling_supported is defined else 'False' }}"
       GOD_MODE="{{ enable_god_mode if enable_god_mode is defined else 'False' }}"
-      LLM_PROJECT_ID="{{ llm_project_id if llm_project_id is defined else '' }}"
-      LLM_TEMPERATURE="{{ llm_temperature if llm_temperature is defined else '0.0' }}"
-      LLM_SEED="{{ llm_seed if llm_seed is defined else '42' }}"
-      LLM_TOP_P="{{ llm_top_p if llm_top_p is defined else '0.0000001' }}"
-      LLM_API_VERSION="{{ llm_api_version if llm_api_version is defined else '2024-09-01-preview' }}"
-      LLM_CONFIGURATION_PARAMETERS='{{ llm_configuration_parameters | to_json | safe if llm_configuration_parameters is defined else {}}}'
       KUBECONFIG="{{ kubeconfig_path_inside_ee.stdout }}"
       GRAFANA_URL="{{ grafana_url }}"
       TOPOLOGY_URL="{{ topology_url }}"
       GRAFANA_SERVICE_ACCOUNT_TOKEN="{{ grafana_service_account_token }}"
       STRUCTURED_UNSTRUCTURED_OUTPUT_DIRECTORY_PATH="/runner/outputs"
+      WX_PROJECT_ID="{{ wx_project_id }}"
+
   register: content_for_env
   tags:
     - sre_agent
@@ -73,20 +89,36 @@
     msg: |-
       RUN_UUID="{{ run_uuid }}"
       SCENARIO_NUMBER="{{ scenario_number }}"
-      LLM_MODEL_NAME="{{ llm_model_name }}"
-      LLM_BASE_URL="{{ llm_base_url }}"
-      IS_AZURE="{{ is_azure if is_azure is defined else 'False' }}"
-      IS_WATSONX="{{ is_watsonx if is_watsonx is defined else 'False' }}"
+      PROVIDER_AGENTS="{{ provider_agents }}"
+      MODEL_AGENTS="{{ model_agents }}"
+      BASE_URL_AGENTS="{{ base_url_agents }}"
+      API_VERSION_AGENTS="{{ api_version_agents }}"
+      API_KEY_AGENTS="{{ api_key_agents }}" # pragma: allowlist secret
+      SEED_AGENTS="{{ seed_agents }}"
+      TOP_P_AGENTS="{{ top_p_agents }}"
+      TEMPERATURE_AGENTS="{{ temperature_agents }}"
+      REASONING_EFFORT_AGENTS="{{ reasoning_effort_agents }}"
+      THINKING_AGENTS="{{ thinking_agents }}"
+      THINKING_BUDGET_AGENTS="{{ thinking_budget_agents }}"
+      PROVIDER_TOOLS="{{ provider_tools }}"
+      MODEL_TOOLS="{{ model_tools }}"
+      BASE_URL_TOOLS="{{ base_url_tools }}"
+      API_VERSION_TOOLS="{{ api_version_tools }}"
+      API_KEY_TOOLS="{{ api_key_tools }}" # pragma: allowlist secret
+      SEED_TOOLS="{{ seed_tools }}"
+      TOP_P_TOOLS="{{ top_p_tools }}"
+      TEMPERATURE_TOOLS="{{ temperature_tools }}"
+      REASONING_EFFORT_TOOLS="{{ reasoning_effort_tools }}"
+      THINKING_TOOLS="{{ thinking_tools }}"
+      THINKING_BUDGET_TOOLS="{{ thinking_budget_tools }}"
+      IS_NATIVE_FUNCTION_CALLING_SUPPORTED="{{ is_native_function_calling_supported if is_native_function_calling_supported is defined else 'False' }}"
       GOD_MODE="{{ enable_god_mode if enable_god_mode is defined else 'False' }}"
-      LLM_PROJECT_ID="{{ llm_project_id if llm_project_id is defined else '' }}"
-      LLM_TEMPERATURE="{{ llm_temperature if llm_temperature is defined else '0.0' }}"
-      LLM_SEED="{{ llm_seed if llm_seed is defined else '42' }}"
-      LLM_TOP_P="{{ llm_top_p if llm_top_p is defined else '0.0000001' }}"
-      LLM_API_VERSION="{{ llm_api_version if llm_api_version is defined else '2024-09-01-preview' }}"
-      LLM_CONFIGURATION_PARAMETERS='{{ llm_configuration_parameters | to_json | safe if llm_configuration_parameters is defined else {}}}'
       KUBECONFIG="{{ kubeconfig_path_inside_ee.stdout }}"
       GRAFANA_URL="{{ grafana_url }}"
       TOPOLOGY_URL="{{ topology_url }}"
+      GRAFANA_SERVICE_ACCOUNT_TOKEN="{{ grafana_service_account_token }}"
+      STRUCTURED_UNSTRUCTURED_OUTPUT_DIRECTORY_PATH="/runner/outputs"
+      WX_PROJECT_ID="{{ wx_project_id }}"
   register: content_for_metadata
   tags:
     - sre_agent
@@ -109,7 +141,7 @@
 - name: Upload metadata to S3 (parent)
   amazon.aws.s3_object:
     endpoint_url: "https://s3.us-east-2.amazonaws.com"
-    bucket: "awx-evaluations"
+    bucket: "{{ s3_bucket_name_for_results }}"
     object: "/{{ sre_agent_name__version_number }}/{{run_uuid}}/{{ scenario_number }}/metadata"
     src: "{{ sre_agent_directory }}/metadata"
     mode: put
@@ -120,7 +152,7 @@
 - name: Upload metadata to S3 (child)
   amazon.aws.s3_object:
     endpoint_url: "https://s3.us-east-2.amazonaws.com"
-    bucket: "awx-evaluations"
+    bucket: "{{ s3_bucket_name_for_results }}"
     object: "/{{ sre_agent_name__version_number }}/{{run_uuid}}/{{scenario_number}}/{{run_number}}/metadata"
     src: "{{ sre_agent_directory }}/metadata"
     mode: put
@@ -142,6 +174,12 @@
   register: tempfile_for_crewai_run
   tags:
     - sre_agent
+
+# - name: Pause for 45 minutes
+#   ansible.builtin.pause:
+#     minutes: 45
+#   tags:
+#     - sre_agent
 
 - name: Run CrewAI and log to file
   ansible.builtin.shell: "source {{ conda_sh_directory }} && conda activate {{ conda_env_directory }} && cd {{ sre_agent_directory }} && crewai run >> {{ tempfile_for_crewai_run.path }}"
@@ -167,7 +205,7 @@
 
 - name: Upload structured-unstructured outputs to S3
   community.aws.s3_sync:
-    bucket: "awx-evaluations"
+    bucket: "{{ s3_bucket_name_for_results }}"
     file_root: "/runner/outputs"
     key_prefix: "{{ sre_agent_name__version_number }}/{{run_uuid}}/{{scenario_number}}/{{run_number}}/outputs"
     region: "us-east-2"
