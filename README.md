@@ -49,7 +49,7 @@ git clone git@github.com:IBM/itbench-sre-agent.git
 cd itbench-sre-agent
 ```
 
-2. This project uses Python 3.12. Install uv for dependecy management, and install crewai.
+2. This project uses Python 3.12. Install uv for dependecy management, and install crewai.  
 Mac/Linux
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
