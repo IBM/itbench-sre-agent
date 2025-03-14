@@ -37,7 +37,7 @@ and then run the agent image with --network=host (docker run --network=host -it 
 ```
 5. Start the agent:
 ```bash
-sudo crewai run
+crewai run
 ```
 
 Pre-built images coming soon.
